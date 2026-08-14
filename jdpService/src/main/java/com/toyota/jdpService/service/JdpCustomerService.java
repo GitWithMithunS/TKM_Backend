@@ -1,0 +1,66 @@
+
+package com.toyota.jdpService.service;
+
+import com.toyota.jdpService.models.JdpCustomer;
+import com.toyota.jdpService.repository.JdpCutomerRepository;
+import jakarta.ws.rs.NotFoundException;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class JdpCustomerService {
+
+    private final JdpCutomerRepository repo;
+
+    public JdpCustomerService(JdpCutomerRepository repo){
+        this.repo = repo;
+    }
+
+    public List<JdpCustomer> getAll(){
+        return repo.findAll();
+    }
+
+    public JdpCustomer getJdpCustomerById(Long id){
+        return repo.findById(id).orElseThrow(() ->
+                new NotFoundException("Customer not found with id : " + id)
+        );
+    }
+
+    public JdpCustomer saveJdpCustomer(JdpCustomer jdpCustomer){
+        return repo.save(jdpCustomer);
+    }
+
+    public List<JdpCustomer> saveAllJdpCustomers(List<JdpCustomer> JdpCustomerList){
+        return repo.saveAll(JdpCustomerList);
+    }
+
+    public void deleteJdpCustomerbyId(Long id){
+        if(!repo.existsById(id)){
+            throw new NotFoundException("Customer not found with id : " + id);
+        }
+        repo.deleteById(id);
+    }
+
+    public void deleteJdpCustomers(List<JdpCustomer> JdpCustomers){
+        repo.deleteAll(JdpCustomers);
+    }
+
+    public JdpCustomer updateJdpCustomer(Long id , JdpCustomer updateJdpCustomer){
+        Optional<JdpCustomer> oldJdpCustomer = repo.findById(id);
+
+        if(oldJdpCustomer.isEmpty()){
+            throw new NotFoundException(
+                    "Customer not found with id : " + id);
+        }
+
+        JdpCustomer customer = oldJdpCustomer.get();
+
+        customer.setSaleDateFrom(updateJdpCustomer.getSaleDateFrom());
+        customer.setSaleDateTo(updateJdpCustomer.getSaleDateTo());
+
+        return repo.save(customer);
+    }
+
+}
