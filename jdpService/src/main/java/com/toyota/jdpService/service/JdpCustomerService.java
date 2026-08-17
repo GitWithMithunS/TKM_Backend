@@ -36,15 +36,15 @@ public class JdpCustomerService {
         return repo.saveAll(JdpCustomerList);
     }
 
-    public void deleteJdpCustomerbyId(Long id){
+    public void deleteJdpCustomerId(Long id){
         if(!repo.existsById(id)){
             throw new NotFoundException("Customer not found with id : " + id);
         }
         repo.deleteById(id);
     }
 
-    public void deleteJdpCustomers(List<JdpCustomer> JdpCustomers){
-        repo.deleteAll(JdpCustomers);
+    public void deleteJdpCustomers(List<Long> ids){
+        repo.deleteAllById(ids);
     }
 
     public JdpCustomer updateJdpCustomer(Long id , JdpCustomer updateJdpCustomer){
@@ -61,6 +61,23 @@ public class JdpCustomerService {
         customer.setSaleDateTo(updateJdpCustomer.getSaleDateTo());
 
         return repo.save(customer);
+    }
+
+    // more safer version for production-chechk if present and only then update
+    public List<JdpCustomer> updateJdpCustomers(
+            List<JdpCustomer> customers) {
+
+        for(JdpCustomer customer : customers){
+
+            if(!repo.existsById(customer.getId())){
+                throw new NotFoundException(
+                        "Customer not found with id : "
+                                + customer.getId()
+                );
+            }
+        }
+
+        return repo.saveAll(customers);
     }
 
 }

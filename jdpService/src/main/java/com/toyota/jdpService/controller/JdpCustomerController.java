@@ -3,10 +3,8 @@ package com.toyota.jdpService.controller;
 import com.toyota.jdpService.models.JdpCustomer;
 import com.toyota.jdpService.service.JdpCustomerService;
 import jakarta.ws.rs.NotFoundException;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,13 +14,13 @@ import java.util.List;
 @CrossOrigin(origins = "*")  //request allowed from anywhere
 public class JdpCustomerController {
 
-    private final JdpCustomerService    service;
+    private final JdpCustomerService service;
 
     public JdpCustomerController(JdpCustomerService jdpCustomerService){
         this.service = jdpCustomerService;
     }
 
-    @PostMapping("/abc")
+    @PostMapping
     public ResponseEntity<?> saveCustomer(@RequestBody JdpCustomer customer){
         try{
             JdpCustomer savedCustomer = service.saveJdpCustomer(customer);
@@ -81,7 +79,7 @@ public class JdpCustomerController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteById(@PathVariable Long id){
         try{
-            service.deleteJdpCustomerbyId(id);
+            service.deleteJdpCustomerId(id);
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(id + ", Deleted Successfully");
@@ -94,9 +92,9 @@ public class JdpCustomerController {
 
     //delete all
     @DeleteMapping("/bulk")
-    public ResponseEntity<?> deleteCustomers(@RequestBody List<JdpCustomer> jdpCustomers){
+    public ResponseEntity<?> deleteCustomers(@RequestBody List<Long> ids){
         try{
-            service.deleteJdpCustomers(jdpCustomers);
+            service.deleteJdpCustomers(ids);
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body( "All Jdp Customers Deleted Successfully");
@@ -122,7 +120,27 @@ public class JdpCustomerController {
         }catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(e.getMessage());        }
+                    .body(e.getMessage());
+        }
+    }
+
+
+    @PutMapping("/bulk")
+    public ResponseEntity<?> updateCustomers(@RequestBody List<JdpCustomer> customers){
+        try{
+            List<JdpCustomer> updatedJdpCustomers = service.updateJdpCustomers(customers);
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(updatedJdpCustomers);
+        } catch (NotFoundException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(e.getMessage());
+        }catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
+        }
     }
 
 }
