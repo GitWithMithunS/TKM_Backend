@@ -29,10 +29,22 @@ public class JdpCustomerService {
     }
 
     public JdpCustomer saveJdpCustomer(JdpCustomer jdpCustomer){
+        if(jdpCustomer.getSaleDateTo().isBefore(jdpCustomer.getSaleDateFrom())){
+            throw new IllegalArgumentException(
+                    "Sale Date To cannot be before Sale Date From"
+            );
+        }
         return repo.save(jdpCustomer);
     }
 
     public List<JdpCustomer> saveAllJdpCustomers(List<JdpCustomer> JdpCustomerList){
+        for(JdpCustomer jdpCustomer : JdpCustomerList){
+            if(jdpCustomer.getSaleDateTo().isBefore(jdpCustomer.getSaleDateFrom())){
+                throw new IllegalArgumentException(
+                        "Sale Date To cannot be before Sale Date From"
+                );
+            }
+        }
         return repo.saveAll(JdpCustomerList);
     }
 
@@ -57,6 +69,12 @@ public class JdpCustomerService {
 
         JdpCustomer customer = oldJdpCustomer.get();
 
+        //validation
+        if(updateJdpCustomer.getSaleDateTo().isBefore(updateJdpCustomer.getSaleDateFrom())){
+            throw new IllegalArgumentException(
+                    "Sale Date To cannot be before Sale Date From"
+            );
+        }
         customer.setSaleDateFrom(updateJdpCustomer.getSaleDateFrom());
         customer.setSaleDateTo(updateJdpCustomer.getSaleDateTo());
 
@@ -73,6 +91,11 @@ public class JdpCustomerService {
                 throw new NotFoundException(
                         "Customer not found with id : "
                                 + customer.getId()
+                );
+            }
+            if(customer.getSaleDateTo().isBefore(customer.getSaleDateFrom())){
+                throw new IllegalArgumentException(
+                        "Sale Date To cannot be before Sale Date From"
                 );
             }
         }
