@@ -1,11 +1,15 @@
-
 package com.toyota.jdpService.service;
 
 import com.toyota.jdpService.models.JdpCustomer;
 import com.toyota.jdpService.repository.JdpCutomerRepository;
 import jakarta.ws.rs.NotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,8 +22,14 @@ public class JdpCustomerService {
         this.repo = repo;
     }
 
-    public List<JdpCustomer> getAll(){
-        return repo.findAll();
+    public Page<JdpCustomer> getAll(Integer page , Integer size){
+        //if no page or size is mention retungoin all the data.
+        if(page == null || size == null) {
+            List<JdpCustomer> allJdpCustomers = repo.findAll();
+            return new PageImpl<>(allJdpCustomers);
+        }
+        Pageable pageable =  PageRequest.of(page , size);
+        return repo.findAll(pageable);
     }
 
     public JdpCustomer getJdpCustomerById(Long id){
@@ -101,6 +111,17 @@ public class JdpCustomerService {
         }
 
         return repo.saveAll(customers);
+    }
+
+    public Page<JdpCustomer> searchCustomers(
+            Boolean isDisabled,
+            LocalDate saleDateFrom,
+            LocalDate saleDateTo,
+            int page,
+            int size
+    ){
+        Pageable pageable = PageRequest.of(page , size);
+        return repo.searchCustomers(isDisabled, saleDateFrom , saleDateTo , pageable);
     }
 
 }
