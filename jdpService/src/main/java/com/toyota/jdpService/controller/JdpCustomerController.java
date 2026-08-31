@@ -5,9 +5,12 @@ import com.toyota.jdpService.service.JdpCustomerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.NotFoundException;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -63,9 +66,13 @@ public class JdpCustomerController {
     description = "Returns all customers from database"
             )
     @GetMapping
-    public ResponseEntity<?> getAllJdpCustomers(){
+    public ResponseEntity<?> getAllJdpCustomers(
+            @RequestParam(name = "page", required = false) Integer page ,
+            @RequestParam(name = "size", required = false) Integer size ){
         try{
-            List<JdpCustomer> jdpCustomers = service.getAll();
+            Page<JdpCustomer> jdpCustomers = service.getAll(page , size);
+
+//                        List<JdpCustomer> jdpCustomers = service.getAll(page , size);
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(jdpCustomers);
@@ -174,6 +181,41 @@ public class JdpCustomerController {
                     .status(HttpStatus.NOT_FOUND)
                     .body(e.getMessage());
         }catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/search")
+    @Operation(
+            summary = "Search filter on Customers",
+            description = "Apply filter and get  those specific jdpcustomers"
+    )
+    public ResponseEntity<?> searchCustomers(
+            @RequestParam(name = "isDisabled", required = false)
+            Boolean isDisabled,
+            @RequestParam(name = "saleDateFrom", required = false)
+            LocalDate saleDateFrom,
+            @RequestParam(name = "saleDateTo", required = false)
+            LocalDate saleDateTo,
+            @RequestParam(name = "page", defaultValue = "0")
+            int page,
+            @RequestParam(name = "size", defaultValue = "10")
+            int size) {
+
+        try {
+            Page<JdpCustomer> customers =
+                    service.searchCustomers(
+                            isDisabled,
+                            saleDateFrom,
+                            saleDateTo,
+                            page,
+                            size);
+
+            return ResponseEntity.ok(customers);
+
+        } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(e.getMessage());
